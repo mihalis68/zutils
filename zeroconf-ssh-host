@@ -33,7 +33,6 @@ wait $pid 2>/dev/null && pkill -HUP -P $watcher
 ###############################################################################
 
 ADJUSTED_NAME=NONE
-set -x
 while read TIMESTAMP AR FLAGS IF DOMAIN SERVICE NAME; do
     if [[ "$DOMAIN" = "local." ]]; then
         shopt -s nocasematch
