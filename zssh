@@ -1,0 +1,4 @@
+#!/bin/sh
+HOST="$@"
+IP=`zeroconf-ssh-host "$HOST" | awk '{print $6}'` 
+ssh $IP

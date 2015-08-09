@@ -1,0 +1,77 @@
+#!/bin/sh
+if [[ -n "$1" ]]; then
+    HOST="$1"
+else
+    HOST=ANYHOST
+fi
+TIMEOUT=1
+initfile() {
+    echo > $1
+}
+
+# We use a couple of temporary files. Open them now so we can simply
+# append all results
+FILE=/tmp/zeroconf-hosts.txt
+initfile $FILE
+FILE2=/tmp/zeroconf-addresses.txt
+initfile $FILE2
+
+###############################################################################
+# the following performs "browse Multicast DNS until $TIMEOUT piping
+# results to a file, then quit and clean up"
+( dns-sd -B _ssh._tcp . >> $FILE ) & pid=$!
+( sleep $TIMEOUT && kill -HUP $pid ) 2>/dev/null & watcher=$!
+wait $pid 2>/dev/null && pkill -HUP -P $watcher
+###############################################################################
+
+###############################################################################
+# the following performs "browse Multicast DNS until $TIMEOUT piping
+# results to a file, then quit and clean up"
+#( dns-sd -B _workstation._tcp . >> $FILE ) & pid=$!
+#( sleep $TIMEOUT && kill -HUP $pid ) 2>/dev/null & watcher=$!
+#wait $pid 2>/dev/null && pkill -HUP -P $watcher
+###############################################################################
+
+ADJUSTED_NAME=NONE
+set -x
+while read TIMESTAMP AR FLAGS IF DOMAIN SERVICE NAME; do
+    if [[ "$DOMAIN" = "local." ]]; then
+        shopt -s nocasematch
+        if [[ $NAME =~ $HOST || $HOST = ANYHOST ]] ; then
+            
+            if [[ $SERVICE == *ssh* ]]; then
+
+                # For Apple machines, the names Multicast DNS browsing
+                # return are not suitable for lookup, we need to "crunch"
+                # them the way apple does - replace spaces with hyphens
+                # and removing apostrophes.
+                # 
+                # Note the apostrophe character Apple adds to mac names is
+                # "single quote open" which you can type using Option-]
+                
+                ADJUSTED_NAME=`echo $NAME | tr ' ' '-' | tr -d "’"`
+
+            elif [[ $SERVICE == *workstation* ]]; then
+                
+                # Non-apple hosts may have crap in the name, but don't
+                # advertise _ssh, so let's take advantage of that for now
+                # by stripping out just the first field only for
+                # _workstation matches
+
+                ADJUSTED_NAME=`echo $NAME | awk '{print $1}'`
+
+            fi
+
+            if [[ ! $ADJUSTED_NAME = NONE ]]; then
+                ###############################################################
+                # the following performs "lookup $ADJUSTED_NAME in
+                # Multicast until $TIMEOUT then quit and clean up"
+                ( dns-sd -G v4 "${ADJUSTED_NAME}.local" >> $FILE2 ) & pid=$!
+                ( sleep $TIMEOUT && kill -HUP $pid ) 2>/dev/null & watcher=$!
+                wait $pid 2>/dev/null && pkill -HUP -P $watcher
+                ###############################################################
+            fi
+        fi
+    fi
+done < $FILE
+cat $FILE2 | grep .local. | sort -k6 -u 
