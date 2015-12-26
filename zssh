@@ -1,4 +1,40 @@
 #!/bin/sh
-HOST="$@"
-IP=`zeroconf-ssh-host "$HOST" | awk '{print $6}'` 
-ssh $IP
+#
+# A utility for logging into hosts in the local domain by looking up a
+# substring of their hostname in the local multicast DNS i.e. using
+# zeroconf. The lookup is performed by invoking zeroconf-ssh-host and
+# taking the first match.
+#
+if [[ -z "$1" ]]; then
+    echo "Usage: $0 <hostname>"
+    exit 1
+fi
+if [[ "$1" = "-v" ]]; then
+    VERBOSE=true
+    shift
+fi
+if [[ "$1" = "-h" ]]; then
+    USEHOSTNAME=true
+    shift
+fi
+HOST="$1"
+shift
+ENTRY=`zeroconf-ssh-host "$HOST" | head -1`
+if [[ -z "$ENTRY" ]]; then
+    echo "Host \"$HOST\" not found"
+    exit 1
+fi
+HN=`echo $ENTRY | awk '{print $5}'` 
+IP=`echo $ENTRY | awk '{print $6}'` 
+if [[ -n "$USEHOSTNAME" ]]; then
+    TARGET=$HN
+else 
+    TARGET=$IP
+fi
+if [[ -n ${TARGET} ]]; then
+    if [[ -n "$VERBOSE" ]]; then
+        echo "Found $TARGET in local domain"
+        echo "Output of \"ssh ${TARGET} ${@}\" :"
+    fi
+    ssh ${TARGET} $@
+fi
