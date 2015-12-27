@@ -9,14 +9,17 @@ if [[ -z "$1" ]]; then
     echo "Usage: $0 <hostname>"
     exit 1
 fi
-if [[ "$1" = "-v" ]]; then
-    VERBOSE=true
-    shift
-fi
-if [[ "$1" = "-h" ]]; then
-    USEHOSTNAME=true
-    shift
-fi
+# First process and consume flags
+while [[ $1 =~ \- ]]; do
+    if [[ "$1" = "-v" ]]; then
+        VERBOSE=true
+        shift
+    fi
+    if [[ "$1" = "-h" ]]; then
+        USEHOSTNAME=true
+        shift
+    fi
+done
 HOST="$1"
 shift
 ENTRY=`zeroconf-ssh-host "$HOST" | head -1`
