@@ -5,6 +5,11 @@
 # zeroconf. The lookup is performed by invoking zeroconf-ssh-host and
 # taking the first match.
 #
+PLATFORM=`uname -a`
+if [[ ! ${PLATFORM} =~ Darwin ]]; then
+    echo "Non-Darwin platforms unsupported!"
+    exit 1
+fi
 if [[ -z "$1" ]]; then
     echo "Usage: $0 <hostname>"
     exit 1
