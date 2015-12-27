@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # A utility for logging into hosts in the local domain by looking up a
 # substring of their hostname in the local multicast DNS i.e. using

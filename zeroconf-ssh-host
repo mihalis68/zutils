@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # A utility to query multicast DNS for a named host or all hosts. This
 # is used by zssh to find all hosts in the local domain that advertise
