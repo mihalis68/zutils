@@ -9,43 +9,55 @@ My setup tends to be that I work from a Mac and login to other macs
 and non-mac unix machines using Remote Desktop, file sharing and ssh a
 lot. I like the fact that Apple's Finder automatically finds (using
 mDNS) all local hosts that advertise their presence. Launching a
-remote desktop or file sharing session to another Mac direcly from
+remote desktop or file sharing session to another Mac directly from
 Finder is very convenient. This is so convenient that I even get my
-non-Mac unix hosts to advertise themselves so that they show up in
+non-Mac Unix hosts to advertise themselves so that they show up in
 Finder. This is particularly handy for headless hosts that come and go
 on DHCP-assigned IP addresses, for example my growing collection of
 Raspberry Pis.
 
 However, I was finding it annoying if I want to ssh to local hosts I
-have to type their exact hostname, which is often long on a
-Mac. Further, using mDNS to ssh to Macs, the .local hostname is not
-even the same string as the "Display Name", thus "Christopher's
-MacBook Pro" is converted to "Christophers-MacBook-Pro" in mDNS. The
-apostrophe is removed and spaces are converted to hyphens. This all
-makes ssh a bit of a poor relation compared to the GUI tools.
+have to type their exact hostname, which is often long on a Mac. I
+wanted some kind of substring matching, so I only need to provide
+something unambiguous and let the machine work it out. Further, using
+raw mDNS to ssh to Macs, the .local hostname is not even the same
+string as the displayed name, thus "Christopher's MacBook Pro" is
+converted to "Christophers-MacBook-Pro" in mDNS (the apostrophe is
+removed and spaces are converted to hyphens). You can see this in
+action on the System Preference Sharing menu where "Computer Name" and
+the hostname in .local have to both be shown.
 
-I started to look into scripting the use of mDNS from the command-line
-to allow me to get into my machines more easily, but another
-irritation arose. Apple's documentation for mDNS service discovery
-(see man dns-sd) tries to scare you away from calling it from
-scripts. Firstly the output format is not stable. Second, the commands
-are meant to be consumed as a stream. That's ok for a GUI application
-such as Finder which runs for a relatively long time. Not ok for a
-quick and dirty comand-line lookup tool.
+This all makes ssh a bit of a poor relation (IMO) compared to the GUI
+tools.
+
+I started to look into scripting easier use of mDNS from the
+command-line to allow me to get into my machines more easily, but
+another irritation arose. Apple's documentation for mDNS service
+discovery (see man dns-sd) tries to scare you away from calling it
+from scripts. Firstly the output format is not stable. Second, the
+commands are meant to be consumed as a stream. That's ok for a GUI
+application such as Finder which runs for a relatively long time. Not
+ok for a quick and dirty comand-line lookup tool.
 
 Apple instead recommends using language-specific bindings for the
 language of your choice to call the underlying DNS-SD API. All very
 well for some serious application, but overkill for a small
-utility. So I built this, "Z Utils". Z Utils for now consists of a
-lookup tool which looks up those hosts which advertise ssh, together
-with an SSH wrapper which looks up the desired host using the lookup
-tool and then invokes ssh to the resulting hostname or IP address to
-easily connect you to the target machine.
+utility. So I built Z Utils instead. 
+
+Z Utils for now consists of a lookup tool which looks up those hosts
+which advertise ssh, a clone of the Unix "host" command which
+leverages the lookup for simple queries and also an SSH wrapper which
+looks up the desired host and then invokes ssh to the resulting
+hostname or IP address to easily connect you to the target machine.
 
 * zeroconf-ssh-host
 
 This utility finds a host or hosts that advertise ssh locally and
-returns their details from mDNS as a series of lines.
+returns their details from mDNS as a series of lines. Bash
+sub-processes and timeouts are used to hide the fact that dns-sd does
+not terminate, and the output of Apple's tool is parsed with simple
+easy to hack unix editing pipelines. This is the meat of the Z utils
+project.
 
 * zhost
 
@@ -64,7 +76,7 @@ Usage examples
 ==============
 
 In the following examples there are two hosts, my MacBook Pro on wifi,
-and a raspberry pi, hostname raspberrypi which is connected by both
+and a raspberry pi, hostname raspberrypi1 which is connected by both
 ethernet and wifi. The rpi is advertising ssh via mDNS, see below for
 how to configure that.
 
@@ -114,8 +126,9 @@ The flags are as follows :
 -v Verbose
 -h Login via hostname
 
-So to verbosely ssh to the rasperry pi using its hostname in .local.
-you would do the following:
+So to verbosely ssh to the rasperry pi using its hostname in
+.local. (instead of merely connecting to its IP address) you would do
+the following:
 
 ```
 Christophers-MacBook-Pro:zu cmorgan$ ./zssh -v -h pi /sbin/iwconfig
@@ -135,3 +148,35 @@ wlan0     IEEE 802.11bgn  ESSID:"Chris Morgan's Upstate Network"
           Tx excessive retries:2  Invalid misc:102   Missed beacon:0
 ```
 
+Advertising ssh from linux
+==========================
+
+Assuming you copy the provided ssh.service file onto a Linux machine,
+and assuming it's a system with apt-get (Ubuntu, or raspbian as I use
+on my Raspberry Pi machines) the following commands would configure
+that machine to advertise ssh via mDNS :
+
+```
+sudo apt-get install libnss-mdns avahi-daemon
+sudo cp ssh.service /etc/avahi/services
+sudo service avahi-daemon restart
+```
+
+Explanation:
+
+* libnss-mdns adds mDNS as a name resolution backend to GNU libC
+* avahi-daemon is the mDNS (zeroconf) implementation for Linux
+* ssh.service is a service fragment that tells avahi to advertise ssh
+  on port 22
+* restarting the daemon forces it to notice the new service it should advertise
+
+N.B. Also install avahi-utils if you want to be able to browse the
+mDNS fields from the linux host, e.g. avahi-browse --all
+
+Limitations
+===========
+
+This project started off as utilities for connecting *from* Apple Macs
+*to* assorted Linux machines. On Linux the situation is much better
+(it is easier to probe and parse mDNS info), so a zssh would be easier
+to implemenet, but I haven't made this work at all yet.
