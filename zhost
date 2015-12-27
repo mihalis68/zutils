@@ -1,0 +1,16 @@
+#!/bin/bash
+if [[ -z "$1" ]]; then
+   echo "Usage: $0 <hostname>"
+   exit 1
+fi
+HOST="$1"
+
+ENTRY=`zeroconf-ssh-host "$HOST" | head -1`
+HN=`echo $ENTRY | awk '{print $5}'`
+IP=`echo $ENTRY | awk '{print $6}'`
+if [[ -n ${IP} ]]; then
+    echo "\"$HOST\" (${HN}) has address $IP"
+else
+    echo "\"$HOST\" not found"
+    exit 1
+fi
