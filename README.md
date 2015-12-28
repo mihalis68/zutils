@@ -131,8 +131,10 @@ zssh <flags> <hostname> <ssh params>
 
 The flags are as follows :
 
+```
 -v Verbose
 -h Login via hostname
+```
 
 So to verbosely ssh to the rasperry pi using its hostname in
 .local. (instead of merely connecting to its IP address) you would do
@@ -155,6 +157,10 @@ wlan0     IEEE 802.11bgn  ESSID:"Chris Morgan's Upstate Network"
           Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
           Tx excessive retries:2  Invalid misc:102   Missed beacon:0
 ```
+
+Connecting via hostname instead of IP address will be more stable than
+using the IP address for machines which get their addresses
+dynamically. I may change this to be the default.
 
 Advertising ssh from linux
 ==========================
