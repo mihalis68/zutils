@@ -92,7 +92,8 @@ Christophers-MacBook-Pro:zu cmorgan$ zeroconf-ssh-host
 15:48:45.731  Add     2  4 raspberrypi1.local.                    10.0.1.38                                    120
 15:48:45.731  Add     3  4 raspberrypi1.local.                    10.0.1.7                                     120
 15:48:44.721  Add     2  4 Christophers-MacBook-Pro.local.        10.0.1.13                                    120
-Christophers-MacBook-Pro:zu cmorgan$ ```
+Christophers-MacBook-Pro:zu cmorgan$ 
+```
 
 * Run a single command on the raspberry pi
 
