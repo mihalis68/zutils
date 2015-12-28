@@ -187,4 +187,5 @@ Limitations
 This project started off as utilities for connecting *from* Apple Macs
 *to* assorted Linux machines. On Linux the situation is much better
 (it is easier to probe and parse mDNS info), so a zssh would be easier
-to implemenet, but I haven't made this work at all yet.
+to implement, but I haven't made this work at all yet. Right now it
+just complains that this is not supported and gives up.
