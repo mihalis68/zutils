@@ -125,7 +125,9 @@ Detailed Command-line options
 
 The full syntax for invoking zssh is
 
+```
 zssh <flags> <hostname> <ssh params>
+```
 
 The flags are as follows :
 
