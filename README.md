@@ -1,9 +1,12 @@
 Z Utils
 =======
 
-This is a tiny collection of tools for leveraging Multicast DNS aka
-Zeroconf aka Bonjour on a network of mixed Apple Macs and other Unix
-machines. 
+This is a tiny collection of tools for leveraging Multicast DNS (aka
+Zeroconf or Bonjour) on a mixed network of Apple Macs and other Unix
+machines. The focus is on making it easier to get around (find and
+login remotely to other machines) starting from a Mac workstation,
+since Apple's mDNS is less command-line friendly than the Linux
+version (avahi).
 
 My setup tends to be that I work from a Mac and login to other macs
 and non-mac unix machines using Remote Desktop, file sharing and ssh a
@@ -12,20 +15,22 @@ mDNS) all local hosts that advertise their presence. Launching a
 remote desktop or file sharing session to another Mac directly from
 Finder is very convenient. This is so convenient that I even get my
 non-Mac Unix hosts to advertise themselves so that they show up in
-Finder. This is particularly handy for headless hosts that come and go
-on DHCP-assigned IP addresses, for example my growing collection of
+Finder too (Linux has a fine zeroconf implementation too). This is
+particularly handy for headless hosts that come and go on
+DHCP-assigned IP addresses, for example my growing collection of
 Raspberry Pis.
 
 However, I was finding it annoying if I want to ssh to local hosts I
 have to type their exact hostname, which is often long on a Mac. I
 wanted some kind of substring matching, so I only need to provide
-something unambiguous and let the machine work it out. Further, using
-raw mDNS to ssh to Macs, the .local hostname is not even the same
-string as the displayed name, thus "Christopher's MacBook Pro" is
-converted to "Christophers-MacBook-Pro" in mDNS (the apostrophe is
-removed and spaces are converted to hyphens). You can see this in
-action on the System Preference Sharing menu where "Computer Name" and
-the hostname in .local have to both be shown.
+something unambiguous and let the machine work it out. 
+
+Further, using raw mDNS to ssh to Macs, the .local hostname is not
+even the same string as the displayed name, thus "Christopher's
+MacBook Pro" is converted to "Christophers-MacBook-Pro" in mDNS (the
+apostrophe is removed and spaces are converted to hyphens). You can
+see this in action on the System Preference Sharing menu where
+"Computer Name" and the hostname in .local have to both be shown.
 
 This all makes ssh a bit of a poor relation (IMO) compared to the GUI
 tools.
