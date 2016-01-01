@@ -9,3 +9,4 @@
     <type>_ssh._tcp</type>
     <port>22</port>
   </service>
+</service-group>
