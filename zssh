@@ -27,6 +27,15 @@ while [[ $1 =~ \- ]]; do
 done
 HOST="$1"
 shift
+# If the address is of the form user@host then split it at the @
+# symbol to get the user and the host separately
+if [[ $HOST =~ \@ ]]; then
+    # append the @ symbol again to make the construction of the entire
+    # address easy later
+    SSHUSER=`echo $HOST | awk -F "@" '{print $1}'`\@
+    # the hostname is unadorned
+    HOST=`echo $HOST | awk -F "@" '{print $2}'`
+fi
 ENTRY=`zeroconf-ssh-host "$HOST" | head -1`
 if [[ -z "$ENTRY" ]]; then
     echo "Host \"$HOST\" not found"
