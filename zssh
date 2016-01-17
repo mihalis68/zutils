@@ -5,6 +5,14 @@
 # zeroconf. The lookup is performed by invoking zeroconf-ssh-host and
 # taking the first match.
 #
+
+function vftrace {
+    if [[ ! -z "$VERBOSE" ]]; then
+        printf "%s" "$@"
+        echo ""
+    fi
+}
+
 PLATFORM=`uname -a`
 if [[ ! ${PLATFORM} =~ Darwin ]]; then
     echo "Non-Darwin platforms unsupported!"
@@ -19,10 +27,13 @@ while [[ $1 =~ \- ]]; do
     if [[ "$1" = "-v" ]]; then
         VERBOSE=true
         shift
-    fi
-    if [[ "$1" = "-h" ]]; then
+    elif [[ "$1" = "-h" ]]; then
         USEHOSTNAME=true
         shift
+    else
+        vftrace "$1 unrecognized, ignored"
+        shift
+        break
     fi
 done
 HOST="$1"
@@ -49,9 +60,7 @@ else
     TARGET=$IP
 fi
 if [[ -n ${TARGET} ]]; then
-    if [[ -n "$VERBOSE" ]]; then
-        echo "Found $TARGET in local domain"
-        echo "Output of \"ssh ${TARGET} ${@}\" :"
-    fi
-    ssh ${TARGET} $@
+    vftrace "Found $TARGET in local domain"
+    vftrace "Output of \"ssh ${SSHUSER}${TARGET} ${@}\" :"
+    ssh ${SSHUSER}${TARGET} $@
 fi
