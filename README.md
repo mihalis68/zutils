@@ -120,6 +120,22 @@ Last login: Sat Dec 26 20:47:27 2015 from christophers-macbook-pro.local
 cmorgan@raspberrypi1 ~ $ 
 ```
 
+* Log in using a different username
+
+```
+Christophers-MacBook-Pro:zu cmorgan$ zssh pi@pi3
+pi@10.0.1.58's password: 
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+No mail.
+Last login: Sun Jan 17 19:10:42 2016 from 10.0.1.32
+```
+
 Detailed Command-line options
 =============================
 
