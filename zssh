@@ -15,8 +15,7 @@ function vftrace {
 
 PLATFORM=`uname -a`
 if [[ ! ${PLATFORM} =~ Darwin ]]; then
-    echo "Non-Darwin platforms unsupported!"
-    exit 1
+    echo "Non-Darwin platforms experimental!"
 fi
 if [[ -z "$1" ]]; then
     echo "Usage: $0 <hostname>"

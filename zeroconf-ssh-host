@@ -14,21 +14,26 @@ initfile() {
     echo > $1
 }
 
-# We use a couple of temporary files. Open them now so we can simply
-# append all results
+# We use a couple of temporary files. Open them now so we can
+# simply append all results
 FILE=/tmp/zeroconf-hosts.txt
 initfile $FILE
 FILE2=/tmp/zeroconf-addresses.txt
 initfile $FILE2
 
-###############################################################################
-# the following performs "browse Multicast DNS for hosts advertising
-# ssh until $TIMEOUT piping results to a file, then quit and clean up"
-( dns-sd -B _ssh._tcp . >> $FILE ) & pid=$!
-( sleep $TIMEOUT && kill -HUP $pid ) 2>/dev/null & watcher=$!
-wait $pid 2>/dev/null && pkill -HUP -P $watcher
-###############################################################################
 
+PLATFORM=`uname -a`
+if [[ ${PLATFORM} =~ Darwin ]]; then
+    ###############################################################################
+    # the following performs "browse Multicast DNS for hosts advertising
+    # ssh until $TIMEOUT piping results to a file, then quit and clean up"
+    ( dns-sd -B _ssh._tcp . >> $FILE ) & pid=$!
+    ( sleep $TIMEOUT && kill -HUP $pid ) 2>/dev/null & watcher=$!
+    wait $pid 2>/dev/null && pkill -HUP -P $watcher
+    ###############################################################################
+else
+    `avahi-browse -at -d local | grep ssh` >> $FILE
+fi
 
 ADJUSTED_NAME=NONE
 while read TIMESTAMP AR FLAGS IF DOMAIN SERVICE NAME; do
