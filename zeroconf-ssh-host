@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # A utility to query multicast DNS for a named host or all hosts. This
 # is used by zssh to find all hosts in the local domain that advertise
@@ -9,7 +9,8 @@ if [[ -n "$1" ]]; then
 else
     HOST=ANYHOST
 fi
-TIMEOUT=1
+TIMEOUT1=3
+TIMEOUT2=1
 initfile() {
     echo > $1
 }
@@ -23,9 +24,9 @@ initfile $FILE2
 
 ###############################################################################
 # the following performs "browse Multicast DNS for hosts advertising
-# ssh until $TIMEOUT piping results to a file, then quit and clean up"
+# ssh until $TIMEOUT1 piping results to a file, then quit and clean up"
 ( dns-sd -B _ssh._tcp . >> $FILE ) & pid=$!
-( sleep $TIMEOUT && kill -HUP $pid ) 2>/dev/null & watcher=$!
+( sleep $TIMEOUT1 && kill -HUP $pid ) 2>/dev/null & watcher=$!
 wait $pid 2>/dev/null && pkill -HUP -P $watcher
 ###############################################################################
 
@@ -53,9 +54,9 @@ while read TIMESTAMP AR FLAGS IF DOMAIN SERVICE NAME; do
             if [[ ! $ADJUSTED_NAME = NONE ]]; then
                 ###############################################################
                 # the following performs "lookup $ADJUSTED_NAME in
-                # Multicast until $TIMEOUT then quit and clean up"
+                # Multicast until $TIMEOUT2 then quit and clean up"
                 ( dns-sd -G v4 "${ADJUSTED_NAME}.local" >> $FILE2 ) & pid=$!
-                ( sleep $TIMEOUT && kill -HUP $pid ) 2>/dev/null & watcher=$!
+                ( sleep $TIMEOUT2 && kill -HUP $pid ) 2>/dev/null & watcher=$!
                 wait $pid 2>/dev/null && pkill -HUP -P $watcher
                 ###############################################################
             fi
