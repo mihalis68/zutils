@@ -4,16 +4,31 @@
 # is used by zssh to find all hosts in the local domain that advertise
 # ssh
 #
+
+# conditional printf
+function vftrace() {
+    if [[ -n "$VERBOSE" ]]; then
+        printf "$@"
+    fi
+}
+
+TIMEOUT1=5
+TIMEOUT2=1
+function initfile() {
+    echo > $1
+}
+
+
+if [[ "$1" = "-v" ]]; then
+    VERBOSE=true
+    shift
+fi
 if [[ -n "$1" ]]; then
     HOST="$1"
 else
     HOST=ANYHOST
 fi
-TIMEOUT1=3
-TIMEOUT2=1
-initfile() {
-    echo > $1
-}
+vftrace "Looking up %s\n" "\"${HOST}\""
 
 # We use a couple of temporary files. Open them now so we can simply
 # append all results
@@ -22,6 +37,7 @@ initfile $FILE
 FILE2=/tmp/zeroconf-addresses.txt
 initfile $FILE2
 
+vftrace "Finding ssh advertisers..."
 ###############################################################################
 # the following performs "browse Multicast DNS for hosts advertising
 # ssh until $TIMEOUT1 piping results to a file, then quit and clean up"
@@ -29,29 +45,33 @@ initfile $FILE2
 ( sleep $TIMEOUT1 && kill -HUP $pid ) 2>/dev/null & watcher=$!
 wait $pid 2>/dev/null && pkill -HUP -P $watcher
 ###############################################################################
+vftrace "done\n"
 
-
-ADJUSTED_NAME=NONE
 while read TIMESTAMP AR FLAGS IF DOMAIN SERVICE NAME; do
     if [[ "$DOMAIN" = "local." ]]; then
         shopt -s nocasematch
+
+        # For Apple machines, the names Multicast DNS browsing
+        # return are not suitable for lookup, we need to "crunch"
+        # them the way apple does - replace spaces with hyphens
+        # and removing apostrophes.
+        # 
+        # Note the apostrophe character Apple adds to mac names is
+        # "single quote open" which you can type using Option-]
+        ADJUSTED_NAME=`echo $NAME | tr ' ' '-' | tr -d "’"`
+        vftrace "Compare to %30s ..." "\"${ADJUSTED_NAME}\""
+
         if [[ $NAME =~ $HOST || $HOST = ANYHOST ]] ; then
-            
+	    vftrace " found!\n"
             if [[ $SERVICE == *ssh* ]]; then
-
-                # For Apple machines, the names Multicast DNS browsing
-                # return are not suitable for lookup, we need to "crunch"
-                # them the way apple does - replace spaces with hyphens
-                # and removing apostrophes.
-                # 
-                # Note the apostrophe character Apple adds to mac names is
-                # "single quote open" which you can type using Option-]
-                
-                ADJUSTED_NAME=`echo $NAME | tr ' ' '-' | tr -d "’"`
-
+		vftrace "ssh is exported by %s\n" "${NAME}"
+	    else
+		vftrace "ssh is NOT exported" ""
+		ADJUSTED_NAME=NONE
             fi
 
             if [[ ! $ADJUSTED_NAME = NONE ]]; then
+		vftrace "Looking up the IPV4 address of %s in ZeroConf..." "\"${ADJUSTED_NAME}\""
                 ###############################################################
                 # the following performs "lookup $ADJUSTED_NAME in
                 # Multicast until $TIMEOUT2 then quit and clean up"
@@ -59,7 +79,11 @@ while read TIMESTAMP AR FLAGS IF DOMAIN SERVICE NAME; do
                 ( sleep $TIMEOUT2 && kill -HUP $pid ) 2>/dev/null & watcher=$!
                 wait $pid 2>/dev/null && pkill -HUP -P $watcher
                 ###############################################################
+		vftrace " done\n"
+		break
             fi
+	else
+	    vftrace " no match\n" ""
         fi
     fi
 done < $FILE
