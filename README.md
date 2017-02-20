@@ -95,6 +95,21 @@ Christophers-MacBook-Pro:zu cmorgan$ zeroconf-ssh-host
 Christophers-MacBook-Pro:zu cmorgan$ 
 ```
 
+* Perform a lookup on a single host, with verbose tracing
+
+```
+chris-mba:zutils.git cmorgan$ zeroconf-ssh-host -v pi3
+Looking up "pi3"
+Finding ssh advertisers...done
+Compare to           "Chriss-MacBook-Air" ... no match
+Compare to                      "lemaker" ... no match
+Compare to                 "raspberrypi2" ... no match
+Compare to                          "pi3" ... found!
+ssh is exported by pi3
+Looking up the IPV4 address of "pi3" in ZeroConf... done
+13:35:48.549  Add     2  4 pi3.local.                             10.0.1.9                                     120
+```
+
 * Run a single command on the raspberry pi
 
 ```
