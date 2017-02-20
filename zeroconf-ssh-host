@@ -4,6 +4,15 @@
 # is used by zssh to find all hosts in the local domain that advertise
 # ssh
 #
+if [[ "$1" = "-v" ]]; then
+    VERBOSE=true
+    shift
+fi
+if [[ -n "$1" ]]; then
+    HOST="$1"
+else
+    HOST=ANYHOST
+fi
 
 # conditional printf
 function vftrace() {
@@ -19,15 +28,6 @@ function initfile() {
 }
 
 
-if [[ "$1" = "-v" ]]; then
-    VERBOSE=true
-    shift
-fi
-if [[ -n "$1" ]]; then
-    HOST="$1"
-else
-    HOST=ANYHOST
-fi
 vftrace "Looking up %s\n" "\"${HOST}\""
 
 # We use a couple of temporary files. Open them now so we can simply
@@ -80,7 +80,9 @@ while read TIMESTAMP AR FLAGS IF DOMAIN SERVICE NAME; do
                 wait $pid 2>/dev/null && pkill -HUP -P $watcher
                 ###############################################################
 		vftrace " done\n"
-		break
+		if [[ ! ${HOST} = ANYHOST ]]; then
+		    break
+		fi
             fi
 	else
 	    vftrace " no match\n" ""
