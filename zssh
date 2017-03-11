@@ -23,17 +23,13 @@ if [[ -z "$1" ]]; then
     exit 1
 fi
 # First process and consume flags
-while [[ $1 =~ \- ]]; do
+while [[ "$#" -gt 1 ]]; do 
     if [[ "$1" = "-v" ]]; then
         VERBOSE=true
         shift
     elif [[ "$1" = "-h" ]]; then
         USEHOSTNAME=true
         shift
-    else
-        vftrace "$1 unrecognized, ignored"
-        shift
-        break
     fi
 done
 HOST="$1"
