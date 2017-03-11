@@ -61,17 +61,17 @@ while read TIMESTAMP AR FLAGS IF DOMAIN SERVICE NAME; do
         ADJUSTED_NAME=`echo $NAME | tr ' ' '-' | tr -d "’"`
         vftrace "Compare to %30s ..." "\"${ADJUSTED_NAME}\""
 
-        if [[ $NAME =~ $HOST || $HOST = ANYHOST ]] ; then
-	    vftrace " found!\n"
+        if [[ ${ADJUSTED_NAME} =~ ${HOST} || $HOST = ANYHOST ]] ; then
+	        vftrace " found!\n"
             if [[ $SERVICE == *ssh* ]]; then
-		vftrace "ssh is exported by %s\n" "${NAME}"
-	    else
-		vftrace "ssh is NOT exported" ""
-		ADJUSTED_NAME=NONE
+		        vftrace "ssh is exported by %s\n" "${NAME}"
+	        else
+		        vftrace "ssh is NOT exported" ""
+		        ADJUSTED_NAME=NONE
             fi
 
             if [[ ! $ADJUSTED_NAME = NONE ]]; then
-		vftrace "Looking up the IPV4 address of %s in ZeroConf..." "\"${ADJUSTED_NAME}\""
+		        vftrace "Looking up the IPV4 address of %s in ZeroConf..." "\"${ADJUSTED_NAME}\""
                 ###############################################################
                 # the following performs "lookup $ADJUSTED_NAME in
                 # Multicast until $TIMEOUT2 then quit and clean up"
@@ -79,13 +79,13 @@ while read TIMESTAMP AR FLAGS IF DOMAIN SERVICE NAME; do
                 ( sleep $TIMEOUT2 && kill -HUP $pid ) 2>/dev/null & watcher=$!
                 wait $pid 2>/dev/null && pkill -HUP -P $watcher
                 ###############################################################
-		vftrace " done\n"
-		if [[ ! ${HOST} = ANYHOST ]]; then
-		    break
-		fi
+		        vftrace " done\n"
+		        if [[ ! ${HOST} = ANYHOST ]]; then
+		            break
+		        fi
             fi
-	else
-	    vftrace " no match\n" ""
+	    else
+	        vftrace " no match\n" ""
         fi
     fi
 done < $FILE
