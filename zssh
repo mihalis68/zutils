@@ -6,10 +6,10 @@
 # taking the first match.
 #
 
-function vftrace {
-    if [[ ! -z "$VERBOSE" ]]; then
-        printf "%s" "$@"
-        echo ""
+# conditional printf
+function vftrace() {
+    if [[ -n "$VERBOSE" ]]; then
+        printf "$@"
     fi
 }
 
@@ -26,9 +26,14 @@ fi
 while [[ "$#" -gt 1 ]]; do 
     if [[ "$1" = "-v" ]]; then
         VERBOSE=true
+        vftrace "verbose\n"
         shift
     elif [[ "$1" = "-h" ]]; then
         USEHOSTNAME=true
+        vftrace "hostname mode\n"
+        shift
+    else
+        vftrace "\"$1\" unrecognized, ignored\n"
         shift
     fi
 done
@@ -56,7 +61,7 @@ else
     TARGET=$IP
 fi
 if [[ -n ${TARGET} ]]; then
-    vftrace "Found $TARGET in local domain"
-    vftrace "Output of \"ssh ${SSHUSER}${TARGET} ${@}\" :"
+    vftrace "Found $TARGET in local domain\n"
+    vftrace "Output of \"ssh ${SSHUSER}${TARGET} ${@}\" :\n"
     ssh ${SSHUSER}${TARGET} $@
 fi
