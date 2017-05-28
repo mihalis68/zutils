@@ -207,6 +207,12 @@ sudo cp ssh.service /etc/avahi/services
 sudo service avahi-daemon restart
 ```
 
+on systemd based distributions, restarting avahi looks like:
+
+```
+sudo systemctl restart avahi-daemon.service
+```
+
 Explanation:
 
 * libnss-mdns adds mDNS as a name resolution backend to GNU libC
