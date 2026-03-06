@@ -65,6 +65,7 @@ while read TIMESTAMP AR FLAGS IF DOMAIN SERVICE NAME; do
 	        vftrace " found!\n"
             if [[ $SERVICE == *ssh* ]]; then
 		        vftrace "ssh is exported by %s\n" "${NAME}"
+				vftrace "ADJUSTED_NAME $ADJUSTED_NAME\n"
 	        else
 		        vftrace "ssh is NOT exported" ""
 		        ADJUSTED_NAME=NONE

@@ -22,10 +22,14 @@ if [[ -z "$1" ]]; then
     echo "Usage: $0 <hostname>"
     exit 1
 fi
+
+VERBOSE=""
+
 # First process and consume flags
 while [[ "$#" -gt 1 ]]; do 
     if [[ "$1" = "-v" ]]; then
         VERBOSE=true
+		VERBOSEFLAG="-v"
         vftrace "verbose\n"
         shift
     elif [[ "$1" = "-h" ]]; then
@@ -48,13 +52,17 @@ if [[ $HOST =~ \@ ]]; then
     # the hostname is unadorned
     HOST=`echo $HOST | awk -F "@" '{print $2}'`
 fi
-ENTRY=`zeroconf-ssh-host "$HOST" | head -1`
+vftrace "try zeroconf-ssh-host $HOST...\n"
+ENTRY=`zeroconf-ssh-host ${VERBOSEFLAG} ${HOST} | grep .local`
 if [[ -z "$ENTRY" ]]; then
-    echo "Host \"$HOST\" not found"
+    echo "Host \"$HOST\" not found\n"
     exit 1
+else
+	vftrace "zeroconf returned:\n$ENTRY\n"
 fi
 HN=`echo $ENTRY | awk '{print $5}'` 
-IP=`echo $ENTRY | awk '{print $6}'` 
+IP=`echo $ENTRY | awk '{print $6}'`
+vftrace "hostname $HN IP address $IP\n"
 if [[ -n "$USEHOSTNAME" ]]; then
     TARGET=$HN
 else 
